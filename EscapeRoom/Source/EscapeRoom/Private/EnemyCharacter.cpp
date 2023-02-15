@@ -2,6 +2,9 @@
 
 
 #include "EnemyCharacter.h"
+#include "DrawDebugHelpers.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
@@ -23,12 +26,48 @@ void AEnemyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
+
+	LookAtActor(PlayerCharacter);
+
 }
 
-// Called to bind functionality to input
-void AEnemyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AEnemyCharacter::LookAtActor(AActor* TargetActor)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	if (TargetActor == nullptr) return;
 
+	if (CanSeeActor(TargetActor))
+	{
+		FVector Start = GetActorLocation();
+		FVector End = TargetActor->GetActorLocation();
+		FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(Start, End);
+
+		SetActorRotation(LookAtRotation);
+	}
 }
+
+bool AEnemyCharacter::CanSeeActor(const AActor* TargetActor) const
+{
+	if (TargetActor == nullptr) return false;
+	FHitResult Hit;
+
+	FVector Start = GetActorLocation();
+	FVector End = TargetActor->GetActorLocation();
+
+	ECollisionChannel Channel = ECollisionChannel::ECC_Visibility;
+
+	FCollisionQueryParams QueryParams;
+
+	QueryParams.AddIgnoredActor(this);
+	QueryParams.AddIgnoredActor(TargetActor);
+
+	GetWorld()->LineTraceSingleByChannel(Hit, Start, End, Channel, QueryParams);
+
+	FColor LineColor = (Hit.bBlockingHit) ? FColor::Green : FColor::Red;
+
+	DrawDebugLine(GetWorld(), Start, End, LineColor);
+
+	return !Hit.bBlockingHit;
+}
+
 
