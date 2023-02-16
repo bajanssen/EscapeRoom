@@ -8,7 +8,7 @@
 #include "TopDownCharacter.generated.h"
 
 UCLASS(config = Game)
-class ATopDownCharacter : public ACharacter
+class ESCAPEROOM_API ATopDownCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
