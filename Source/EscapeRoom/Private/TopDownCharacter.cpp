@@ -90,6 +90,9 @@ void ATopDownCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 
 		EnhancedPlayerInputComponent->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ATopDownCharacter::Move);
 	}
+	EnhancedPlayerInputComponent->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ATopDownCharacter::Move);
+	EnhancedPlayerInputComponent->BindAction(IA_Jump, ETriggerEvent::Triggered, this, &ATopDownCharacter::Jump);
+	EnhancedPlayerInputComponent->BindAction(IA_Jump, ETriggerEvent::Completed, this, &ATopDownCharacter::StopJumping);
 }
 
 void ATopDownCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
@@ -105,9 +108,9 @@ void ATopDownCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Loca
 void ATopDownCharacter::Move(const FInputActionValue& Value)
 {
 	FVector2D InputValue = Value.Get<FVector2D>();
-	if (Controller != nullptr && (InputValue.X != 0.0f || InputValue.Y != 0.0f))
+	if (FollowCamera != nullptr && (InputValue.X != 0.0f || InputValue.Y != 0.0f))
 	{
-		const FRotator YawRotation(0, Controller->GetControlRotation().Yaw, 0);
+		const FRotator YawRotation(0, FollowCamera->GetComponentRotation().Yaw, 0);
 
 		if (InputValue.X != 0.0f)
 		{
