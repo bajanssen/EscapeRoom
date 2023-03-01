@@ -7,26 +7,49 @@
 #include "EnemyCharacter.generated.h"
 
 UCLASS()
-class ESCAPEROOM_API AEnemyCharacter : public ACharacter
+class DODGEBALL_API AEnemyCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+private:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = LookAt, meta = (AllowPrivateAccess = "true"))
+		class USceneComponent* SightSource;
+
 public:
+
 	// Sets default values for this character's properties
 	AEnemyCharacter();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+protected:
 
-	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 
-	void LookAtActor(AActor* TargetActor);
+	// Change the rotation of the character to face the given actor
+	// Returns whether the given actor can be seen
+	bool LookAtActor(AActor* TargetActor);
 
-	bool CanSeeActor(const AActor* const TargetActor) const;
+	// Can we see the given actor
+	bool CanSeeActor(AActor* TargetActor);
+
+	void ThrowDodgeball();
+
+	//Whether the enemy can see the player this frame
+	bool bCanSeePlayer = false;
+	//Whether the enemy could see the player last frame
+	bool bPreviousCanSeePlayer = false;
+
+	FTimerHandle ThrowTimerHandle;
+
+	float ThrowingInterval = 2.f;
+	float ThrowingDelay = 0.5f;
+
+	//The class used to spawn a dodgeball object
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Dodgeball)
+		TSubclassOf<class ADodgeballProjectile> DodgeballClass;
+
 };
